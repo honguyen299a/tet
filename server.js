@@ -3,7 +3,7 @@ const jsonServer = require("json-server");
 const jwt = require("jsonwebtoken");
 
 const server = jsonServer.create();
-const router = jsonServer.router("db.json");
+const router = jsonServer.router("products.json");
 const middlewares = jsonServer.defaults();
 
 const SECRET_KEY = "123"; // ✅ FIX: thêm thiếu cái này
