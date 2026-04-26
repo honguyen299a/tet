@@ -58,7 +58,7 @@ function verifyToken(req, res, next) {
 }
 
 //
-// 🔥 CHECK ADMIN (PHÂN QUYỀN)
+// 🔥 CHECK ADMIN
 //
 function checkAdmin(req, res, next) {
   if (req.user.role !== "admin") {
@@ -68,29 +68,41 @@ function checkAdmin(req, res, next) {
 }
 
 //
-// 🔥 BẢO VỆ HOTELS (AI CŨNG XEM ĐƯỢC KHI CÓ TOKEN)
+// ===============================
+// 🔥 HOTELS ROUTES
+// ===============================
 //
+
+/**
+ * GET: user + admin đều xem được
+ */
 server.get("/hotels", verifyToken, (req, res, next) => {
   next();
 });
 
-//
-// 🔥 CHẶN UPDATE / DELETE CHỈ ADMIN
-//
-server.put("/hotels/:id", verifyToken, checkAdmin, (req, res, next) => {
-  next();
-});
-
-server.delete("/hotels/:id", verifyToken, checkAdmin, (req, res, next) => {
-  next();
-});
-
+/**
+ * POST: chỉ admin
+ */
 server.post("/hotels", verifyToken, checkAdmin, (req, res, next) => {
   next();
 });
 
+/**
+ * PUT: chỉ admin
+ */
+server.put("/hotels/:id", verifyToken, checkAdmin, (req, res, next) => {
+  next();
+});
+
+/**
+ * DELETE: chỉ admin
+ */
+server.delete("/hotels/:id", verifyToken, checkAdmin, (req, res, next) => {
+  next();
+});
+
 //
-// 🚫 CHẶN USERS
+// 🚫 CHẶN USERS (không cho truy cập trực tiếp)
 //
 server.use("/users", (req, res) => {
   res.status(403).json({ message: "Không cho truy cập" });
@@ -104,7 +116,7 @@ server.use("/db", (req, res) => {
 });
 
 //
-// 📦 JSON SERVER ROUTES
+// 📦 JSON SERVER ROUTES (QUAN TRỌNG)
 //
 server.use(router);
 
