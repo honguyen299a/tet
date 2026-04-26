@@ -1,26 +1,15 @@
 {
-  "products": [
+  "users": [
+    { "id": 1, "username": "admin", "password": "123", "role": "admin" },
+    { "id": 2, "username": "user", "password": "123", "role": "user" }
+  ],
+  "hotels": [
     {
       "id": 1,
-      "name": "Product A",
-      "price": 100
-    },
-    {
-      "name": "caculator",
-      "price": "8000",
-      "id": 2
-    },
-    {
-      "name": "laptop",
-      "id": 3
-    },
-    {
-      "name": "laptop",
-      "id": 4
-    },
-    {
-      "name": "laptop",
-      "id": 5
+      "name": "Hotel A",
+      "price_per_night": 100,
+      "location": "Quy Nhon",
+      "rating": 4.5
     }
   ]
 }
