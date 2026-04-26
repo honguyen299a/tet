@@ -1,0 +1,26 @@
+{
+  "products": [
+    {
+      "id": 1,
+      "name": "Product A",
+      "price": 100
+    },
+    {
+      "name": "caculator",
+      "price": "8000",
+      "id": 2
+    },
+    {
+      "name": "laptop",
+      "id": 3
+    },
+    {
+      "name": "laptop",
+      "id": 4
+    },
+    {
+      "name": "laptop",
+      "id": 5
+    }
+  ]
+}
