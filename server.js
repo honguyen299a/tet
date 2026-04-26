@@ -6,19 +6,18 @@ const server = jsonServer.create();
 const router = jsonServer.router("products.json");
 const middlewares = jsonServer.defaults();
 
-const SECRET_KEY = "123"; // ✅ FIX: thêm thiếu cái này
+const SECRET_KEY = "123";
 
 server.use(express.json());
 server.use(express.urlencoded({ extended: true }));
 server.use(middlewares);
 
 //
-// 🔐 LOGIN (Authentication)
+// 🔐 LOGIN
 //
 server.post("/login", (req, res) => {
   const { username, password } = req.body;
 
-  // ✅ FIX: đọc db an toàn hơn
   const users = router.db.get("users").value() || [];
 
   const user = users.find(
@@ -37,7 +36,7 @@ server.post("/login", (req, res) => {
 });
 
 //
-// 🔐 Middleware check token
+// 🔐 VERIFY TOKEN
 //
 function verifyToken(req, res, next) {
   const auth = req.headers["authorization"];
@@ -59,31 +58,58 @@ function verifyToken(req, res, next) {
 }
 
 //
-// 🔥 Bảo vệ hotels
+// 🔥 CHECK ADMIN (PHÂN QUYỀN)
 //
-server.use("/hotels", verifyToken);
+function checkAdmin(req, res, next) {
+  if (req.user.role !== "admin") {
+    return res.status(403).json({ message: "Chỉ admin mới được phép" });
+  }
+  next();
+}
 
 //
-// 🚫 Chặn users
+// 🔥 BẢO VỆ HOTELS (AI CŨNG XEM ĐƯỢC KHI CÓ TOKEN)
+//
+server.get("/hotels", verifyToken, (req, res, next) => {
+  next();
+});
+
+//
+// 🔥 CHẶN UPDATE / DELETE CHỈ ADMIN
+//
+server.put("/hotels/:id", verifyToken, checkAdmin, (req, res, next) => {
+  next();
+});
+
+server.delete("/hotels/:id", verifyToken, checkAdmin, (req, res, next) => {
+  next();
+});
+
+server.post("/hotels", verifyToken, checkAdmin, (req, res, next) => {
+  next();
+});
+
+//
+// 🚫 CHẶN USERS
 //
 server.use("/users", (req, res) => {
   res.status(403).json({ message: "Không cho truy cập" });
 });
 
 //
-// 🚫 Chặn db
+// 🚫 CHẶN DB
 //
 server.use("/db", (req, res) => {
   res.status(403).json({ message: "Không cho truy cập" });
 });
 
 //
-// 📦 API json-server
+// 📦 JSON SERVER ROUTES
 //
 server.use(router);
 
 //
-// 🚀 PORT (Render bắt buộc dùng process.env.PORT)
+// 🚀 PORT
 //
 const PORT = process.env.PORT || 3000;
 
