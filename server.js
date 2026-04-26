@@ -1,14 +1,13 @@
+const express = require("express");
 const jsonServer = require("json-server");
 const jwt = require("jsonwebtoken");
 
 const server = jsonServer.create();
 const router = jsonServer.router("db.json");
-const middlewares = jsonServer.defaults();
 
-const SECRET_KEY = "123";
-
-server.use(middlewares);
-server.use(jsonServer.bodyParser);
+server.use(express.json());
+server.use(express.urlencoded({ extended: true }));
+server.use(jsonServer.defaults());
 
 //
 // 🔐 LOGIN (Authentication)
