@@ -19,7 +19,7 @@ server.post("/login", (req, res) => {
   const { username, password } = req.body;
 
   // ✅ FIX: đọc db an toàn hơn
-  const users = router.db.getState().users || [];
+  const users = router.db.get("users").value() || [];
 
   const user = users.find(
     (u) => u.username === username && u.password === password,
