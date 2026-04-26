@@ -13,8 +13,9 @@ server.use(express.urlencoded({ extended: true }));
 server.use(middlewares);
 
 //
+// ===============================
 // 🔐 LOGIN
-//
+// ===============================
 server.post("/login", (req, res) => {
   const { username, password } = req.body;
 
@@ -36,8 +37,9 @@ server.post("/login", (req, res) => {
 });
 
 //
+// ===============================
 // 🔐 VERIFY TOKEN
-//
+// ===============================
 function verifyToken(req, res, next) {
   const auth = req.headers["authorization"];
 
@@ -58,8 +60,9 @@ function verifyToken(req, res, next) {
 }
 
 //
+// ===============================
 // 🔥 CHECK ADMIN
-//
+// ===============================
 function checkAdmin(req, res, next) {
   if (req.user.role !== "admin") {
     return res.status(403).json({ message: "Chỉ admin mới được phép" });
@@ -74,9 +77,9 @@ function checkAdmin(req, res, next) {
 //
 
 /**
- * GET: user + admin đều xem được
+ * GET: ai cũng xem được (KHÔNG cần token)
  */
-server.get("/hotels", verifyToken, (req, res, next) => {
+server.get("/hotels", (req, res, next) => {
   next();
 });
 
@@ -102,7 +105,7 @@ server.delete("/hotels/:id", verifyToken, checkAdmin, (req, res, next) => {
 });
 
 //
-// 🚫 CHẶN USERS (không cho truy cập trực tiếp)
+// 🚫 CHẶN USERS
 //
 server.use("/users", (req, res) => {
   res.status(403).json({ message: "Không cho truy cập" });
@@ -116,15 +119,20 @@ server.use("/db", (req, res) => {
 });
 
 //
-// 📦 JSON SERVER ROUTES (QUAN TRỌNG)
+// 📦 JSON SERVER ROUTES
 //
 server.use(router);
+
+//
+// 🏠 ROOT TEST
+//
 server.get("/", (req, res) => {
   res.json({
     message: "API đang chạy",
-    endpoints: ["/login", "/hotels", "/users"],
+    endpoints: ["/login", "/hotels"],
   });
 });
+
 //
 // 🚀 PORT
 //
