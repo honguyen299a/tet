@@ -4,17 +4,22 @@ const jwt = require("jsonwebtoken");
 
 const server = jsonServer.create();
 const router = jsonServer.router("db.json");
+const middlewares = jsonServer.defaults();
+
+const SECRET_KEY = "123"; // ✅ FIX: thêm thiếu cái này
 
 server.use(express.json());
 server.use(express.urlencoded({ extended: true }));
-server.use(jsonServer.defaults());
+server.use(middlewares);
 
 //
 // 🔐 LOGIN (Authentication)
 //
 server.post("/login", (req, res) => {
   const { username, password } = req.body;
-  const users = router.db.get("users").value();
+
+  // ✅ FIX: đọc db an toàn hơn
+  const users = router.db.getState().users || [];
 
   const user = users.find(
     (u) => u.username === username && u.password === password,
@@ -37,12 +42,16 @@ server.post("/login", (req, res) => {
 function verifyToken(req, res, next) {
   const auth = req.headers["authorization"];
 
-  if (!auth) return res.status(403).json({ message: "Thiếu token" });
+  if (!auth) {
+    return res.status(403).json({ message: "Thiếu token" });
+  }
 
   const token = auth.split(" ")[1];
 
   jwt.verify(token, SECRET_KEY, (err, user) => {
-    if (err) return res.status(401).json({ message: "Token sai" });
+    if (err) {
+      return res.status(401).json({ message: "Token sai" });
+    }
 
     req.user = user;
     next();
@@ -68,8 +77,14 @@ server.use("/db", (req, res) => {
   res.status(403).json({ message: "Không cho truy cập" });
 });
 
+//
+// 📦 API json-server
+//
 server.use(router);
 
+//
+// 🚀 PORT (Render bắt buộc dùng process.env.PORT)
+//
 const PORT = process.env.PORT || 3000;
 
 server.listen(PORT, () => {
