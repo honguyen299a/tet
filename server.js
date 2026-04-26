@@ -119,7 +119,12 @@ server.use("/db", (req, res) => {
 // 📦 JSON SERVER ROUTES (QUAN TRỌNG)
 //
 server.use(router);
-
+server.get("/", (req, res) => {
+  res.json({
+    message: "API đang chạy",
+    endpoints: ["/login", "/hotels", "/users"],
+  });
+});
 //
 // 🚀 PORT
 //
