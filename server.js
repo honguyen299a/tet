@@ -141,3 +141,12 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`Server chạy tại port ${PORT}`);
 });
+const rateLimit = require("express-rate-limit");
+
+const limiter = rateLimit({
+  windowMs: 60 * 1000, // 1 phút
+  max: 100, // tối đa 100 request
+  message: "Bạn gọi API quá nhiều, thử lại sau",
+});
+
+server.use(limiter);
