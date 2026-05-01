@@ -1,12 +1,13 @@
 const express = require("express");
 const jsonServer = require("json-server");
 const jwt = require("jsonwebtoken");
+const rateLimit = require("express-rate-limit");
 
 const server = jsonServer.create();
 const router = jsonServer.router("products.json");
 const middlewares = jsonServer.defaults();
 
-const SECRET_KEY = "123";
+const SECRET_KEY = "my_secret_key_2026";
 
 server.use(express.json());
 server.use(express.urlencoded({ extended: true }));
@@ -14,10 +15,24 @@ server.use(middlewares);
 
 //
 // ===============================
+// 🚫 RATE LIMIT LOGIN
+// ===============================
+const loginLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 phút
+  max: 5, // tối đa 5 lần login / phút
+  message: { message: "Bạn login quá nhiều, thử lại sau" },
+});
+
+//
+// ===============================
 // 🔐 LOGIN
 // ===============================
-server.post("/login", (req, res) => {
+server.post("/login", loginLimiter, (req, res) => {
   const { username, password } = req.body;
+
+  if (!username || !password) {
+    return res.status(400).json({ message: "Thiếu dữ liệu" });
+  }
 
   const users = router.db.get("users").value() || [];
 
@@ -44,7 +59,7 @@ function verifyToken(req, res, next) {
   const auth = req.headers["authorization"];
 
   if (!auth) {
-    return res.status(403).json({ message: "Thiếu token" });
+    return res.status(401).json({ message: "Thiếu token" });
   }
 
   const token = auth.split(" ")[1];
@@ -74,35 +89,20 @@ function checkAdmin(req, res, next) {
 // ===============================
 // 🔥 HOTELS ROUTES
 // ===============================
-//
 
-/**
- * GET: ai cũng xem được (KHÔNG cần token)
- */
-server.get("/hotels", (req, res, next) => {
-  next();
-});
+// GET: public
+server.get("/hotels", (req, res, next) => next());
 
-/**
- * POST: chỉ admin
- */
-server.post("/hotels", verifyToken, checkAdmin, (req, res, next) => {
-  next();
-});
+// POST: admin only
+server.post("/hotels", verifyToken, checkAdmin, (req, res, next) => next());
 
-/**
- * PUT: chỉ admin
- */
-server.put("/hotels/:id", verifyToken, checkAdmin, (req, res, next) => {
-  next();
-});
+// PUT: admin only
+server.put("/hotels/:id", verifyToken, checkAdmin, (req, res, next) => next());
 
-/**
- * DELETE: chỉ admin
- */
-server.delete("/hotels/:id", verifyToken, checkAdmin, (req, res, next) => {
-  next();
-});
+// DELETE: admin only
+server.delete("/hotels/:id", verifyToken, checkAdmin, (req, res, next) =>
+  next(),
+);
 
 //
 // 🚫 CHẶN USERS
@@ -124,7 +124,7 @@ server.use("/db", (req, res) => {
 server.use(router);
 
 //
-// 🏠 ROOT TEST
+// 🏠 ROOT
 //
 server.get("/", (req, res) => {
   res.json({
@@ -134,19 +134,10 @@ server.get("/", (req, res) => {
 });
 
 //
-// 🚀 PORT
+// 🚀 START SERVER
 //
 const PORT = process.env.PORT || 3000;
 
 server.listen(PORT, () => {
   console.log(`Server chạy tại port ${PORT}`);
 });
-const rateLimit = require("express-rate-limit");
-
-const limiter = rateLimit({
-  windowMs: 60 * 1000, // 1 phút
-  max: 5, // tối đa 100 request
-  message: "Bạn gọi API quá nhiều, thử lại sau",
-});
-
-server.use(limiter);
