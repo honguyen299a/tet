@@ -145,7 +145,7 @@ const rateLimit = require("express-rate-limit");
 
 const limiter = rateLimit({
   windowMs: 60 * 1000, // 1 phút
-  max: 100, // tối đa 100 request
+  max: 5, // tối đa 100 request
   message: "Bạn gọi API quá nhiều, thử lại sau",
 });
 
